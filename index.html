@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html lang="de">
 <head>
+<meta charset="UTF-8">
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Julian's Liveticker-Tool</title>
+    <title>Julian's Liveticker Tool</title>
     <link rel="icon" href="https://www.rot-weiss-essen.de/wp-content/themes/RotWeissEssen/images/Rot-Weiss-Essen-Vereinslogo.png" type="image/png">
     <style>
         body {
@@ -197,6 +198,45 @@
         .dark-mode .player-item:hover {
             background-color: #777; /* Slightly lighter on hover */
         }
+		/* Footer Styles */
+.footer {
+    width: 100%;
+    padding: 20px;
+    text-align: center;
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    box-shadow: 0 -2px 5px rgba(0, 0, 0, 0.1);
+    background-color: #f5f5f5; /* Standard Hintergrundfarbe */
+    color: #333; /* Standard Textfarbe */
+}
+
+.footer a {
+    color: #E1001E; /* Rot für Links */
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 16px;
+}
+
+.footer a:hover {
+    text-decoration: underline;
+}
+
+/* Dark Mode Styles für Footer */
+body.dark-mode .footer {
+    background-color: #333; /* Dunkler Hintergrund im Dark Mode */
+    color: #f5f5f5; /* Helle Textfarbe im Dark Mode */
+}
+
+body.dark-mode .footer a {
+    color: #f5f5f5; /* Helle Links im Dark Mode */
+}
+
+body.dark-mode .footer a:hover {
+    color: #E1001E; /* Rot bei Hover im Dark Mode */
+}
+
     </style>
 </head>
 <body>
@@ -207,7 +247,7 @@
     <div class="container">
         <div class="header">
             <img src="https://www.rot-weiss-essen.de/wp-content/themes/RotWeissEssen/images/Rot-Weiss-Essen-Vereinslogo.png" alt="RWE Logo">
-            <h1>Julian's Liveticker-Tool</h1>
+            <h1>Julian's Liveticker Tool</h1>
         </div>
 
         <textarea id="textInput" class="input-field" rows="4" placeholder="Gib den Text hier ein..." onkeydown="handleKey(event)"></textarea>
@@ -290,6 +330,13 @@
     </div>
 
     <div id="toast" class="toast">Text kopiert!</div>
+	
+	<div class="footer">
+    <a href="https://htmlpreview.github.io/?https://github.com/yungjulian/julians-tools/blob/main/Julians_Liveticker_Tool.html" target="_blank">Liveticker Tool</a>
+    <a href="https://htmlpreview.github.io/?https://github.com/yungjulian/julians-tools/blob/main/Julians_Posting_Tool.html" target="_blank">Posting Tool</a>
+    <a href="https://htmlpreview.github.io/?https://github.com/yungjulian/julians-tools/blob/main/Julians_Spielstand_Tool.html" target="_blank">Spielstand Tool</a>
+</div>
+
 
     <script>
         let darkMode = false;
