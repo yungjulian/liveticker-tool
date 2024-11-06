@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Julian's Liveticker-Tool</title>
+    <link rel="icon" href="https://www.rot-weiss-essen.de/wp-content/themes/RotWeissEssen/images/Rot-Weiss-Essen-Vereinslogo.png" type="image/png">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            height: 100vh;
+            padding: 20px;
+            transition: background-color 0.3s;
+        }
+        .container {
+            max-width: 600px;
+            flex: 3;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            transition: background-color 0.3s;
+        }
+        .input-field {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            transition: border-color 0.3s;
+        }
+        .input-field:focus {
+            border-color: #E1001E;
+            outline: none;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .emojis {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        .output {
+            border: 1px solid #ddd;
+            padding: 10px;
+            margin-top: 10px;
+            white-space: pre-wrap;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+        .output-text {
+            margin-bottom: 10px;
+        }
+        .buttons {
+            margin-top: 10px;
+            display: flex;
+            gap: 10px;
+        }
+        button {
+            background-color: #E1001E;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #b0001e;
+        }
+        .toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: #333;
+            color: #fff;
+            text-align: center;
+            border-radius: 5px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1;
+            left: 50%;
+            bottom: 30px;
+            transform: translateX(-50%);
+            font-size: 14px;
+        }
+        .toast.show {
+            visibility: visible;
+            animation: fadeInOut 3s;
+        }
+        @keyframes fadeInOut {
+            0%, 100% { opacity: 0; }
+            10%, 90% { opacity: 1; }
+        }
+        /* Dark Mode Styles */
+        .dark-mode {
+            background-color: #212121;
+            color: #ffffff;
+        }
+        .dark-mode .container {
+            background-color: #171717;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+        }
+        .dark-mode .input-field {
+            background-color: #171717;
+            border-color: #666;
+            color: #ffffff;
+        }
+        .dark-mode .output {
+            background-color: #666;
+            border-color: #777;
+        }
+        .dark-mode button {
+            background-color: #E1001E;
+        }
+        .dark-mode button:hover {
+            background-color: #b0001e;
+        }
+        .dark-mode .toast {
+            background-color: #222;
+        }
+        .dark-mode .toast.show {
+            background-color: #444;
+        }
+        .dark-mode-toggle {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: #E1001E;
+            color: #ffffff;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .dark-mode-toggle:hover {
+            background-color: #b0001e;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            width: 30px;
+            height: 30px;
+            margin-right: 10px;
+        }
+        .player-list {
+            margin-top: 20px;
+            padding: 10px;
+            border: 1px solid #ddd;
+            background-color: #f8f9fa;
+            border-radius: 4px;
+            display: flex;
+            flex-direction: column;
+        }
+        .player-list.dark {
+            background-color: #444;
+            border-color: #666;
+        }
+        .player-item {
+            margin: 2px 5px;
+            padding: 5px;
+            background-color: #f1f1f1;
+            border-radius: 4px;
+            cursor: pointer;
+            display: inline-block;
+            color: #333; /* Normal text color */
+        }
+        .player-item:hover {
+            background-color: #e1e1e1;
+        }
+        .player-container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 5px; /* Abstand zwischen den Spielern */
+        }
+        /* Dark mode colors for player items */
+        .dark-mode .player-item {
+            background-color: #666; /* Dark background */
+            color: #ffffff; /* White text color */
+        }
+        .dark-mode .player-item:hover {
+            background-color: #777; /* Slightly lighter on hover */
+        }
+    </style>
+</head>
+<body>
+    <button class="dark-mode-toggle" onclick="toggleDarkMode()">
+        <span id="modeIcon">🌙</span>
+    </button>
+
+    <div class="container">
+        <div class="header">
+            <img src="https://www.rot-weiss-essen.de/wp-content/themes/RotWeissEssen/images/Rot-Weiss-Essen-Vereinslogo.png" alt="RWE Logo">
+            <h1>Julian's Liveticker-Tool</h1>
+        </div>
+
+        <textarea id="textInput" class="input-field" rows="4" placeholder="Gib den Text hier ein..." onkeydown="handleKey(event)"></textarea>
+
+        <div class="controls">
+            <label for="minuteInput">Minute:</label>
+            <input type="number" id="minuteInput" value="0" min="0" class="input-field" style="width: 70px;">
+        </div>
+
+        <div class="emojis">
+            <button onclick="addEmoji('➡️')">➡️</button>
+            <button onclick="addEmoji('⬅️')">⬅️</button>
+			<button onclick="addEmoji('🔄')">🔄</button>
+            <button onclick="addEmoji('🟨')">🟨</button>
+            <button onclick="addEmoji('🟥')">🟥</button>
+            <button onclick="addEmoji('⚽')">⚽</button>
+			<button onclick="addEmoji('⏯️')">⏯️</button>
+			<button onclick="addEmoji('⏸️')">⏸️</button>
+        </div>
+
+        <input type="text" id="hashtagInput" class="input-field" placeholder="Hashtags (z.B. #RWEFCE)">
+
+        <div class="controls">
+            <label for="scoreInput1">Spielstand:</label>
+            <input type="number" id="scoreInput1" value="0" min="0" class="input-field" style="width: 50px;">
+            <span>:</span>
+            <input type="number" id="scoreInput2" value="0" min="0" class="input-field" style="width: 50px;">
+        </div>
+
+        <button onclick="generateOutput()">Erzeuge Liveticker-Ausgabe</button>
+
+        <div class="output" id="output">
+            <div class="output-text" id="outputText"></div>
+        </div>
+
+        <div class="buttons">
+            <button onclick="copyText()">Text kopieren</button>
+        </div>
+
+        <div class="player-list" id="playerList">
+            <strong>Torhüter</strong>
+            <div class="player-container">
+                <div class="player-item" onclick="insertPlayer('Golz')">1 Golz</div>
+                <div class="player-item" onclick="insertPlayer('Springer')">31 Springer</div>
+                <div class="player-item" onclick="insertPlayer('Wienand')">35 Wienand</div>
+            </div>
+            <strong>Verteidiger</strong>
+            <div class="player-container">
+                <div class="player-item" onclick="insertPlayer('Eitschberger')">2 Eitschberger</div>
+                <div class="player-item" onclick="insertPlayer('Schultz')">4 Schultz</div>
+                <div class="player-item" onclick="insertPlayer('Brumme')">14 Brumme</div>
+                <div class="player-item" onclick="insertPlayer('Kourouma')">16 Kourouma</div>
+                <div class="player-item" onclick="insertPlayer('Celebi')">17 Celebi</div>
+                <div class="player-item" onclick="insertPlayer('Voufack')">19 Voufack</div>
+                <div class="player-item" onclick="insertPlayer('Ríos Alonso')">23 Ríos Alonso</div>
+                <div class="player-item" onclick="insertPlayer('Kraulich')">33 Kraulich</div>
+            </div>
+            <strong>Mittelfeld</strong>
+            <div class="player-container">
+                <div class="player-item" onclick="insertPlayer('Arslan')">6 Arslan</div>
+                <div class="player-item" onclick="insertPlayer('Kaparos')">8 Kaparos</div>
+                <div class="player-item" onclick="insertPlayer('Eisfeld')">10 Eisfeld</div>
+                <div class="player-item" onclick="insertPlayer('Müsel')">26 Müsel</div>
+                <div class="player-item" onclick="insertPlayer('Moustier')">28 Moustier</div>
+                <div class="player-item" onclick="insertPlayer('Kaiser')">18 Kaiser</div>
+                <div class="player-item" onclick="insertPlayer('Swajkowski')">39 Swajkowski</div>
+            </div>
+            <strong>Stürmer</strong>
+            <div class="player-container">
+                <div class="player-item" onclick="insertPlayer('D\'Haese')">7 D'Haese</div>
+                <div class="player-item" onclick="insertPlayer('Vonic')">9 Vonic</div>
+                <div class="player-item" onclick="insertPlayer('Safi')">11 Safi</div>
+                <div class="player-item" onclick="insertPlayer('Berisha')">21 Berisha</div>
+                <div class="player-item" onclick="insertPlayer('Boyamba')">22 Boyamba</div>
+                <div class="player-item" onclick="insertPlayer('Wintzheimer')">25 Wintzheimer</div>
+                <div class="player-item" onclick="insertPlayer('Doumbouya')">29 Doumbouya</div>
+                <div class="player-item" onclick="insertPlayer('Owusu')">30 Owusu</div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast" class="toast">Text kopiert!</div>
+
+    <script>
+        let darkMode = false;
+
+        function toggleDarkMode() {
+            darkMode = !darkMode;
+            document.body.classList.toggle("dark-mode", darkMode);
+            document.querySelector('.player-list').classList.toggle("dark", darkMode);
+            const modeIcon = document.getElementById('modeIcon');
+            modeIcon.textContent = darkMode ? '🌞' : '🌙'; // Toggle icon
+        }
+
+        function handleKey(event) {
+            if (event.key === 'Enter') {
+                if (event.shiftKey) {
+                    event.preventDefault(); // Prevent default behavior
+                    insertParagraph(); // Insert a single paragraph
+                } else {
+                    event.preventDefault(); // Prevent default behavior
+                    generateOutput(); // Generate output
+                }
+            }
+        }
+
+        function insertParagraph() {
+            const textArea = document.getElementById('textInput');
+            const start = textArea.selectionStart;
+            const end = textArea.selectionEnd;
+
+            // Insert a single new line at the current cursor position
+            textArea.value = textArea.value.substring(0, start) + '\n' + textArea.value.substring(end);
+            textArea.selectionStart = textArea.selectionEnd = start + 1; // Move the cursor after the new line
+        }
+
+        function addEmoji(emoji) {
+            const textArea = document.getElementById('textInput');
+            const start = textArea.selectionStart;
+            const end = textArea.selectionEnd;
+
+            // Insert emoji at the current cursor position
+            textArea.value = textArea.value.substring(0, start) + emoji + ' ' + textArea.value.substring(end);
+            textArea.selectionStart = textArea.selectionEnd = start + emoji.length + 1; // Move the cursor after the emoji
+            textArea.focus(); // Ensure the textarea is focused after inserting
+        }
+
+        function insertPlayer(playerName) {
+            const textArea = document.getElementById('textInput');
+            const start = textArea.selectionStart;
+            const end = textArea.selectionEnd;
+
+            // Insert player name at the current cursor position
+            textArea.value = textArea.value.substring(0, start) + playerName + ' ' + textArea.value.substring(end);
+            textArea.selectionStart = textArea.selectionEnd = start + playerName.length + 1; // Move the cursor after the player name
+            textArea.focus(); // Ensure the textarea is focused after inserting
+        }
+
+        function generateOutput() {
+            const text = document.getElementById('textInput').value;
+            const minute = document.getElementById('minuteInput').value;
+            const hashtag = document.getElementById('hashtagInput').value;
+            const score1 = document.getElementById('scoreInput1').value;
+            const score2 = document.getElementById('scoreInput2').value;
+
+            const outputText = `${text}\n\n⏱️ ${minute}‘ | ${hashtag} ${score1}:${score2} | #RWE`;
+            document.getElementById('outputText').textContent = outputText;
+
+            // Clear only the input text field after generating output
+            clearInputText();
+        }
+
+        function clearInputText() {
+            document.getElementById('textInput').value = ''; // Only clear the text input
+        }
+
+        function copyText() {
+            const output = document.getElementById('outputText').textContent;
+            navigator.clipboard.writeText(output).then(() => {
+                document.getElementById('toast').className = "toast show";
+                setTimeout(() => {
+                    document.getElementById('toast').className = "toast"; // Hide toast message after some time
+                }, 3000);
+            });
+        }
+    </script>
+</body>
+</html>
