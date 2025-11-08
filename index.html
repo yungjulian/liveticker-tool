@@ -317,7 +317,7 @@
             const score1 = document.getElementById('scoreInput1').value;
             const score2 = document.getElementById('scoreInput2').value;
 
-            const outputText = `${text}\n\n⏱️ ${minute}‘ | ${hashtag} ${score1}:${score2}`;
+            const outputText = `${hashtag} ${score1}:${score2} | ${minute}‘`;
             document.getElementById('outputText').textContent = outputText;
 
             // Clear only the input text field after generating output
@@ -340,5 +340,3 @@
     </script>
 </body>
 </html>
-
-
