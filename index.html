@@ -255,92 +255,135 @@
     <div id="toast" class="toast">Text kopiert!</div>
 
 
-    <script>
-        let darkMode = false;
+<script>
+    let darkMode = false;
 
-        function toggleDarkMode() {
-            darkMode = !darkMode;
-            document.body.classList.toggle("dark-mode", darkMode);
-            document.querySelector('.player-list').classList.toggle("dark", darkMode);
-            const modeIcon = document.getElementById('modeIcon');
-            modeIcon.textContent = darkMode ? '🌞' : '🌙'; // Toggle icon
-        }
+    function toggleDarkMode() {
+        darkMode = !darkMode;
+        document.body.classList.toggle("dark-mode", darkMode);
+        document.querySelector('.player-list').classList.toggle("dark", darkMode);
+        const modeIcon = document.getElementById('modeIcon');
+        modeIcon.textContent = darkMode ? '🌞' : '🌙'; // Toggle icon
+    }
 
-        function handleKey(event) {
-            if (event.key === 'Enter') {
-                if (event.shiftKey) {
-                    event.preventDefault(); // Prevent default behavior
-                    insertParagraph(); // Insert a single paragraph
-                } else {
-                    event.preventDefault(); // Prevent default behavior
-                    generateOutput(); // Generate output
-                }
+    function handleKey(event) {
+        if (event.key === 'Enter') {
+            if (event.shiftKey) {
+                event.preventDefault(); // Prevent default behavior
+                insertParagraph(); // Insert a single paragraph
+            } else {
+                event.preventDefault(); // Prevent default behavior
+                generateOutput(); // Generate output
             }
         }
+    }
 
-        function insertParagraph() {
-            const textArea = document.getElementById('textInput');
-            const start = textArea.selectionStart;
-            const end = textArea.selectionEnd;
+    function insertParagraph() {
+        const textArea = document.getElementById('textInput');
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
 
-            // Insert a single new line at the current cursor position
-            textArea.value = textArea.value.substring(0, start) + '\n' + textArea.value.substring(end);
-            textArea.selectionStart = textArea.selectionEnd = start + 1; // Move the cursor after the new line
+        // Insert a single new line at the current cursor position
+        textArea.value =
+            textArea.value.substring(0, start) +
+            '\n' +
+            textArea.value.substring(end);
+        textArea.selectionStart = textArea.selectionEnd = start + 1; // Move the cursor after the new line
+    }
+
+    function addEmoji(emoji) {
+        const textArea = document.getElementById('textInput');
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+
+        // Insert emoji at the current cursor position
+        textArea.value =
+            textArea.value.substring(0, start) +
+            emoji +
+            ' ' +
+            textArea.value.substring(end);
+        textArea.selectionStart = textArea.selectionEnd = start + emoji.length + 1; // Move the cursor after the emoji
+        textArea.focus(); // Ensure the textarea is focused after inserting
+    }
+
+    function insertPlayer(playerName) {
+        const textArea = document.getElementById('textInput');
+        const start = textArea.selectionStart;
+        const end = textArea.selectionEnd;
+
+        // Insert player name at the current cursor position
+        textArea.value =
+            textArea.value.substring(0, start) +
+            playerName +
+            ' ' +
+            textArea.value.substring(end);
+        textArea.selectionStart = textArea.selectionEnd = start + playerName.length + 1; // Move the cursor after the player name
+        textArea.focus(); // Ensure the textarea is focused after inserting
+    }
+
+    let oldTexts = [];
+    let currentIndex = -1;
+
+    const textArea = document.getElementById('textInput');
+
+    function saveText() {
+        const val = textArea.value.trim();
+        if (val && (oldTexts.length === 0 || oldTexts[oldTexts.length - 1] !== val)) {
+            oldTexts.push(val);
+            currentIndex = oldTexts.length; // Set index behind last element
         }
+    }
 
-        function addEmoji(emoji) {
-            const textArea = document.getElementById('textInput');
-            const start = textArea.selectionStart;
-            const end = textArea.selectionEnd;
-
-            // Insert emoji at the current cursor position
-            textArea.value = textArea.value.substring(0, start) + emoji + ' ' + textArea.value.substring(end);
-            textArea.selectionStart = textArea.selectionEnd = start + emoji.length + 1; // Move the cursor after the emoji
-            textArea.focus(); // Ensure the textarea is focused after inserting
+    textArea.addEventListener('keydown', function (event) {
+        if (event.key === 'ArrowUp') {
+            if (currentIndex > 0) {
+                currentIndex--;
+                textArea.value = oldTexts[currentIndex];
+                event.preventDefault();
+            }
+        } else if (event.key === 'ArrowDown') {
+            if (currentIndex < oldTexts.length - 1) {
+                currentIndex++;
+                textArea.value = oldTexts[currentIndex];
+                event.preventDefault();
+            } else if (currentIndex === oldTexts.length - 1) {
+                currentIndex++;
+                textArea.value = '';
+                event.preventDefault();
+            }
+        } else if (event.key === 'Enter' && !event.shiftKey) {
+            saveText(); // Save text on submit
         }
+    });
 
-        function insertPlayer(playerName) {
-            const textArea = document.getElementById('textInput');
-            const start = textArea.selectionStart;
-            const end = textArea.selectionEnd;
+    function generateOutput() {
+        const text = document.getElementById('textInput').value;
+        const minute = document.getElementById('minuteInput').value;
+        const hashtag = document.getElementById('hashtagInput').value;
+        const score1 = document.getElementById('scoreInput1').value;
+        const score2 = document.getElementById('scoreInput2').value;
 
-            // Insert player name at the current cursor position
-            textArea.value = textArea.value.substring(0, start) + playerName + ' ' + textArea.value.substring(end);
-            textArea.selectionStart = textArea.selectionEnd = start + playerName.length + 1; // Move the cursor after the player name
-            textArea.focus(); // Ensure the textarea is focused after inserting
-        }
+        const outputText = `${text}\n\n${hashtag} ${score1}:${score2} | ${minute}‘`;
+        document.getElementById('outputText').textContent = outputText;
 
-        function generateOutput() {
-            const text = document.getElementById('textInput').value;
-            const minute = document.getElementById('minuteInput').value;
-            const hashtag = document.getElementById('hashtagInput').value;
-            const score1 = document.getElementById('scoreInput1').value;
-            const score2 = document.getElementById('scoreInput2').value;
+        saveText(); // Save text before clearing
+        clearInputText();
+    }
 
-            const outputText = `${text}\n\n${hashtag} ${score1}:${score2} | ${minute}‘`;
-            document.getElementById('outputText').textContent = outputText;
+    function clearInputText() {
+        document.getElementById('textInput').value = ''; // Only clear the text input
+    }
 
-            // Clear only the input text field after generating output
-            clearInputText();
-        }
+    function copyText() {
+        const output = document.getElementById('outputText').textContent;
+        navigator.clipboard.writeText(output).then(() => {
+            document.getElementById('toast').className = 'toast show';
+            setTimeout(() => {
+                document.getElementById('toast').className = 'toast'; // Hide toast message after some time
+            }, 3000);
+        });
+    }
+</script>
 
-        function clearInputText() {
-            document.getElementById('textInput').value = ''; // Only clear the text input
-        }
-
-        function copyText() {
-            const output = document.getElementById('outputText').textContent;
-            navigator.clipboard.writeText(output).then(() => {
-                document.getElementById('toast').className = "toast show";
-                setTimeout(() => {
-                    document.getElementById('toast').className = "toast"; // Hide toast message after some time
-                }, 3000);
-            });
-        }
-    </script>
 </body>
 </html>
-
-
-
-
